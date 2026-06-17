@@ -10,31 +10,29 @@
 <style>
   *{box-sizing:border-box;}
   html,body{margin:0;}
-  body{
-    font-family:'M PLUS Rounded 1c',sans-serif;
+  body{font-family:'M PLUS Rounded 1c',sans-serif;color:#4A3F33;min-height:100vh;
     background:
       radial-gradient(1200px 700px at 80% -10%, #FBE6CC 0%, transparent 55%),
       radial-gradient(1000px 700px at -5% 110%, #DEEADE 0%, transparent 52%),
-      #ECE2D0;
-    color:#4A3F33; min-height:100vh;
-  }
+      #ECE2D0;}
   .demo-page{padding:34px 20px 50px;}
-  .demo-head{text-align:center; max-width:760px; margin:0 auto 30px;}
-  .demo-head h1{font-family:'Zen Maru Gothic'; font-weight:900; font-size:30px; margin:0; letter-spacing:.01em;}
-  .demo-head h1 em{font-style:normal; font-size:15px; font-weight:700; color:#fff; background:linear-gradient(135deg,#EF9A4D,#C26B86);
-    padding:5px 13px; border-radius:999px; vertical-align:middle; margin-left:8px;}
-  .demo-head p{font-size:14px; line-height:1.8; color:#8C8073; font-weight:600; margin:14px 0 0;}
-  .demo-row{display:flex; flex-wrap:wrap; gap:46px; justify-content:center; align-items:flex-start;}
-  .demo-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
-  .demo-label{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px; color:#4A3F33;
-    background:#fff; padding:8px 18px; border-radius:999px; box-shadow:0 4px 14px -8px rgba(74,63,51,.4);}
-  .demo-foot{text-align:center; font-size:12px; color:#A89C8C; font-weight:600; margin-top:42px;}
+  .demo-head{text-align:center;max-width:760px;margin:0 auto 30px;}
+  .demo-head h1{font-family:'Zen Maru Gothic';font-weight:900;font-size:30px;margin:0;}
+  .demo-head h1 em{font-style:normal;font-size:15px;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,#EF9A4D,#C26B86);padding:5px 13px;border-radius:999px;
+    vertical-align:middle;margin-left:8px;}
+  .demo-head p{font-size:14px;line-height:1.8;color:#8C8073;font-weight:600;margin:14px 0 0;}
+  .demo-row{display:flex;flex-wrap:wrap;gap:46px;justify-content:center;align-items:flex-start;}
+  .demo-col{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .demo-label{font-family:'Zen Maru Gothic';font-weight:700;font-size:14px;color:#4A3F33;
+    background:#fff;padding:8px 18px;border-radius:999px;box-shadow:0 4px 14px -8px rgba(74,63,51,.4);}
+  .demo-foot{text-align:center;font-size:12px;color:#A89C8C;font-weight:600;margin-top:42px;}
 
   /* neutralise each app's full-screen stage so they sit side by side */
-  .hc-stage{display:block!important; min-height:0!important; padding:0!important; background:transparent!important; width:392px!important;}
-  .ad-stage{display:block!important; min-height:0!important; padding:0!important; background:transparent!important; width:940px!important;}
+  .hc-stage{display:block!important;min-height:0!important;padding:0!important;background:transparent!important;width:392px!important;}
+  .ad-stage{display:block!important;min-height:0!important;padding:0!important;background:transparent!important;width:940px!important;}
   .hc-phone{margin:0 auto!important;}
-  .ad-root .browser{margin:0 auto!important; height:812px!important; width:940px!important; max-width:none!important;}
+  .ad-root .browser{margin:0 auto!important;height:812px!important;width:940px!important;max-width:none!important;}
 
   @media (max-width:560px){
     .demo-head h1{font-size:23px;}
@@ -42,30 +40,75 @@
     .ad-root .browser{width:100%!important;}
   }
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?deps=react@18.2.0",
-    "lucide-react": "https://esm.sh/lucide-react@0.383.0?deps=react@18.2.0"
-  }
-}
-</script>
-<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" data-type="module" data-presets="react">
-import React, { useState, useEffect } from "react";
-import { createRoot } from "react-dom/client";
-import { Home, BookOpen, Footprints, Bell, LayoutGrid, ChevronDown, ChevronRight, ChevronLeft, Check, X, Calendar, Camera, ClipboardList, Phone, Settings, Send, Thermometer, Moon, Utensils, Smile, QrCode, Heart, Bus, Cookie, Plus, LayoutDashboard, Menu, Search, Clock, AlertTriangle, Wind, Users, CircleDot, Minus, Eye } from "lucide-react";
+<script type="text/babel" data-presets="react">
+
+var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
+var createRoot = ReactDOM.createRoot;
+var ICON_SVG = {"AlertTriangle": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" />\n  <path d=\"M12 9v4\" />\n  <path d=\"M12 17h.01\" />", "Bell": "<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" />\n  <path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />", "BookOpen": "<path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\" />\n  <path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\" />", "Bus": "<path d=\"M8 6v6\" />\n  <path d=\"M15 6v6\" />\n  <path d=\"M2 12h19.6\" />\n  <path d=\"M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3\" />\n  <circle cx=\"7\" cy=\"18\" r=\"2\" />\n  <path d=\"M9 18h5\" />\n  <circle cx=\"16\" cy=\"18\" r=\"2\" />", "Calendar": "<path d=\"M8 2v4\" />\n  <path d=\"M16 2v4\" />\n  <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" />\n  <path d=\"M3 10h18\" />", "Camera": "<path d=\"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z\" />\n  <circle cx=\"12\" cy=\"13\" r=\"3\" />", "Check": "<path d=\"M20 6 9 17l-5-5\" />", "ChevronDown": "<path d=\"m6 9 6 6 6-6\" />", "ChevronLeft": "<path d=\"m15 18-6-6 6-6\" />", "ChevronRight": "<path d=\"m9 18 6-6-6-6\" />", "CircleDot": "<circle cx=\"12\" cy=\"12\" r=\"10\" />\n  <circle cx=\"12\" cy=\"12\" r=\"1\" />", "ClipboardList": "<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\" />\n  <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\" />\n  <path d=\"M12 11h4\" />\n  <path d=\"M12 16h4\" />\n  <path d=\"M8 11h.01\" />\n  <path d=\"M8 16h.01\" />", "Clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" />\n  <polyline points=\"12 6 12 12 16 14\" />", "Cookie": "<path d=\"M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5\" />\n  <path d=\"M8.5 8.5v.01\" />\n  <path d=\"M16 15.5v.01\" />\n  <path d=\"M12 12v.01\" />\n  <path d=\"M11 17v.01\" />\n  <path d=\"M7 14v.01\" />", "Eye": "<path d=\"M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z\" />\n  <circle cx=\"12\" cy=\"12\" r=\"3\" />", "Footprints": "<path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\" />\n  <path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\" />\n  <path d=\"M16 17h4\" />\n  <path d=\"M4 13h4\" />", "Heart": "<path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\" />", "Home": "<path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />\n  <polyline points=\"9 22 9 12 15 12 15 22\" />", "LayoutDashboard": "<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\" />\n  <rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />", "LayoutGrid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "Menu": "<line x1=\"4\" x2=\"20\" y1=\"12\" y2=\"12\" />\n  <line x1=\"4\" x2=\"20\" y1=\"6\" y2=\"6\" />\n  <line x1=\"4\" x2=\"20\" y1=\"18\" y2=\"18\" />", "Minus": "<path d=\"M5 12h14\" />", "Moon": "<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\" />", "Phone": "<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\" />", "Plus": "<path d=\"M5 12h14\" />\n  <path d=\"M12 5v14\" />", "QrCode": "<rect width=\"5\" height=\"5\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"5\" height=\"5\" x=\"16\" y=\"3\" rx=\"1\" />\n  <rect width=\"5\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />\n  <path d=\"M21 16h-3a2 2 0 0 0-2 2v3\" />\n  <path d=\"M21 21v.01\" />\n  <path d=\"M12 7v3a2 2 0 0 1-2 2H7\" />\n  <path d=\"M3 12h.01\" />\n  <path d=\"M12 3h.01\" />\n  <path d=\"M12 16v.01\" />\n  <path d=\"M16 12h1\" />\n  <path d=\"M21 12v.01\" />\n  <path d=\"M12 21v-1\" />", "Search": "<circle cx=\"11\" cy=\"11\" r=\"8\" />\n  <path d=\"m21 21-4.3-4.3\" />", "Send": "<path d=\"m22 2-7 20-4-9-9-4Z\" />\n  <path d=\"M22 2 11 13\" />", "Settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" />\n  <circle cx=\"12\" cy=\"12\" r=\"3\" />", "Smile": "<circle cx=\"12\" cy=\"12\" r=\"10\" />\n  <path d=\"M8 14s1.5 2 4 2 4-2 4-2\" />\n  <line x1=\"9\" x2=\"9.01\" y1=\"9\" y2=\"9\" />\n  <line x1=\"15\" x2=\"15.01\" y1=\"9\" y2=\"9\" />", "Thermometer": "<path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z\" />", "Users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" />\n  <circle cx=\"9\" cy=\"7\" r=\"4\" />\n  <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" />\n  <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "Utensils": "<path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2\" />\n  <path d=\"M7 2v20\" />\n  <path d=\"M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7\" />", "Wind": "<path d=\"M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2\" />\n  <path d=\"M9.6 4.6A2 2 0 1 1 11 8H2\" />\n  <path d=\"M12.6 19.4A2 2 0 1 0 14 16H2\" />", "X": "<path d=\"M18 6 6 18\" />\n  <path d=\"m6 6 12 12\" />"};
+function makeIcon(name) {
+  return function (props) {
+    props = props || {};
+    var size = props.size || 24;
+    return React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: size, height: size, viewBox: "0 0 24 24",
+      fill: props.fill || "none",
+      stroke: props.color || "currentColor",
+      strokeWidth: props.strokeWidth || 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: props.style, className: props.className,
+      dangerouslySetInnerHTML: { __html: ICON_SVG[name] }
+    });
+  };
+}
+var AlertTriangle = makeIcon("AlertTriangle");
+var Bell = makeIcon("Bell");
+var BookOpen = makeIcon("BookOpen");
+var Bus = makeIcon("Bus");
+var Calendar = makeIcon("Calendar");
+var Camera = makeIcon("Camera");
+var Check = makeIcon("Check");
+var ChevronDown = makeIcon("ChevronDown");
+var ChevronLeft = makeIcon("ChevronLeft");
+var ChevronRight = makeIcon("ChevronRight");
+var CircleDot = makeIcon("CircleDot");
+var ClipboardList = makeIcon("ClipboardList");
+var Clock = makeIcon("Clock");
+var Cookie = makeIcon("Cookie");
+var Eye = makeIcon("Eye");
+var Footprints = makeIcon("Footprints");
+var Heart = makeIcon("Heart");
+var Home = makeIcon("Home");
+var LayoutDashboard = makeIcon("LayoutDashboard");
+var LayoutGrid = makeIcon("LayoutGrid");
+var Menu = makeIcon("Menu");
+var Minus = makeIcon("Minus");
+var Moon = makeIcon("Moon");
+var Phone = makeIcon("Phone");
+var Plus = makeIcon("Plus");
+var QrCode = makeIcon("QrCode");
+var Search = makeIcon("Search");
+var Send = makeIcon("Send");
+var Settings = makeIcon("Settings");
+var Smile = makeIcon("Smile");
+var Thermometer = makeIcon("Thermometer");
+var Users = makeIcon("Users");
+var Utensils = makeIcon("Utensils");
+var Wind = makeIcon("Wind");
+var X = makeIcon("X");
 
 
 /* ------------------------------------------------------------------ */
 /*  そらいろほいくえん — 保護者向け連絡アプリ プロトタイプ            */
 /* ------------------------------------------------------------------ */
 
-const STYLES = `
+const STYLES_P = `
 @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
 
 .hc-root{
@@ -836,7 +879,7 @@ function HoikuConnectApp() {
 
   return (
     <div className="hc-root">
-      <style>{STYLES}</style>
+      <style>{STYLES_P}</style>
       <div className="hc-stage">
         <div className="hc-phone">
           <div className="hc-notch" />
@@ -922,7 +965,7 @@ function HoikuConnectApp() {
 /*  そらいろ保育園 — 先生用 管理画面（タブレット/PC/スマホ対応）       */
 /* ------------------------------------------------------------------ */
 
-const STYLES = `
+const STYLES_A = `
 @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
 
 .ad-root{
@@ -1479,7 +1522,7 @@ function HoikuAdminApp() {
 
   return (
     <div className="ad-root">
-      <style>{STYLES}</style>
+      <style>{STYLES_A}</style>
       <div className="ad-stage">
         <div className="browser">
           <div className="bz-bar">
