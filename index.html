@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>そらいろ保育園 れんらくアプリ — デモ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:'M PLUS Rounded 1c',sans-serif;
+    background:
+      radial-gradient(1200px 700px at 80% -10%, #FBE6CC 0%, transparent 55%),
+      radial-gradient(1000px 700px at -5% 110%, #DEEADE 0%, transparent 52%),
+      #ECE2D0;
+    color:#4A3F33; min-height:100vh;
+  }
+  .demo-page{padding:34px 20px 50px;}
+  .demo-head{text-align:center; max-width:760px; margin:0 auto 30px;}
+  .demo-head h1{font-family:'Zen Maru Gothic'; font-weight:900; font-size:30px; margin:0; letter-spacing:.01em;}
+  .demo-head h1 em{font-style:normal; font-size:15px; font-weight:700; color:#fff; background:linear-gradient(135deg,#EF9A4D,#C26B86);
+    padding:5px 13px; border-radius:999px; vertical-align:middle; margin-left:8px;}
+  .demo-head p{font-size:14px; line-height:1.8; color:#8C8073; font-weight:600; margin:14px 0 0;}
+  .demo-row{display:flex; flex-wrap:wrap; gap:46px; justify-content:center; align-items:flex-start;}
+  .demo-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .demo-label{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px; color:#4A3F33;
+    background:#fff; padding:8px 18px; border-radius:999px; box-shadow:0 4px 14px -8px rgba(74,63,51,.4);}
+  .demo-foot{text-align:center; font-size:12px; color:#A89C8C; font-weight:600; margin-top:42px;}
+
+  /* neutralise each app's full-screen stage so they sit side by side */
+  .hc-stage{display:block!important; min-height:0!important; padding:0!important; background:transparent!important; width:392px!important;}
+  .ad-stage{display:block!important; min-height:0!important; padding:0!important; background:transparent!important; width:940px!important;}
+  .hc-phone{margin:0 auto!important;}
+  .ad-root .browser{margin:0 auto!important; height:812px!important; width:940px!important; max-width:none!important;}
+
+  @media (max-width:560px){
+    .demo-head h1{font-size:23px;}
+    .ad-stage{width:100%!important;}
+    .ad-root .browser{width:100%!important;}
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?deps=react@18.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.383.0?deps=react@18.2.0"
+  }
+}
+</script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-type="module" data-presets="react">
+import React, { useState, useEffect } from "react";
+import { createRoot } from "react-dom/client";
+import { Home, BookOpen, Footprints, Bell, LayoutGrid, ChevronDown, ChevronRight, ChevronLeft, Check, X, Calendar, Camera, ClipboardList, Phone, Settings, Send, Thermometer, Moon, Utensils, Smile, QrCode, Heart, Bus, Cookie, Plus, LayoutDashboard, Menu, Search, Clock, AlertTriangle, Wind, Users, CircleDot, Minus, Eye } from "lucide-react";
+
+
+/* ------------------------------------------------------------------ */
+/*  そらいろほいくえん — 保護者向け連絡アプリ プロトタイプ            */
+/* ------------------------------------------------------------------ */
+
+const STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
+
+.hc-root{
+  --cream:#FBF6EE; --cream2:#F4ECDC; --surface:#FFFFFF;
+  --apricot:#EF9A4D; --apricot-d:#E07E2E; --apricot-soft:#FCE6CB;
+  --sage:#7FA784; --sage-soft:#DEEADE; --berry:#C26B86; --berry-soft:#F4DCE4;
+  --sky:#6BA3C2; --sky-soft:#DCEAF1;
+  --ink:#4A3F33; --ink2:#8C8073; --line:#EBE1D1;
+  font-family:'M PLUS Rounded 1c',sans-serif;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+.hc-stage{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:28px 12px;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #FBE6CC 0%, transparent 55%),
+    radial-gradient(900px 600px at -10% 110%, #DEEADE 0%, transparent 50%),
+    #F0E7D6;
+}
+.hc-phone{
+  width:100%; max-width:392px; height:812px; background:var(--cream);
+  border-radius:46px; position:relative; overflow:hidden;
+  box-shadow:0 2px 0 4px #2c2620, 0 0 0 14px #15110d, 0 30px 70px -20px rgba(40,30,16,.55);
+  display:flex; flex-direction:column;
+}
+.hc-notch{position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:150px; height:30px; background:#15110d; border-radius:0 0 20px 20px; z-index:60;}
+.hc-statusbar{display:flex; justify-content:space-between; align-items:center;
+  padding:14px 26px 4px; font-size:13px; font-weight:700; color:var(--ink); flex:0 0 auto; z-index:55;}
+.hc-statusbar .dots{display:flex; gap:5px; align-items:center;}
+.hc-statusbar .bar{width:18px; height:10px; border:1.5px solid var(--ink); border-radius:3px; position:relative;}
+.hc-statusbar .bar:after{content:''; position:absolute; right:-3px; top:3px; width:2px; height:4px; background:var(--ink); border-radius:1px;}
+
+.hc-scroll{flex:1 1 auto; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;}
+.hc-scroll::-webkit-scrollbar{width:0;}
+
+/* header */
+.hc-head{position:sticky; top:0; z-index:40; padding:6px 18px 14px;
+  background:linear-gradient(180deg,var(--cream) 70%, rgba(251,246,238,0));}
+.hc-head-row{display:flex; align-items:center; justify-content:space-between;}
+.hc-brand{display:flex; align-items:center; gap:9px;}
+.hc-brand .mk{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--apricot),var(--berry));
+  display:flex;align-items:center;justify-content:center;color:#fff; box-shadow:0 4px 12px -4px var(--apricot);}
+.hc-brand b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:16px; letter-spacing:.02em;}
+.hc-brand span{display:block; font-size:10.5px; color:var(--ink2); font-weight:600; margin-top:-1px;}
+.hc-bell{position:relative; width:38px;height:38px;border:none;cursor:pointer;border-radius:50%;
+  background:var(--surface); color:var(--ink); display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px -3px rgba(74,63,51,.25);}
+.hc-bell .ndot{position:absolute; top:7px; right:8px; width:9px;height:9px;border-radius:50%;
+  background:var(--berry); border:2px solid var(--surface);}
+
+/* child switcher */
+.hc-child{margin-top:12px; width:100%; border:none; cursor:pointer; text-align:left;
+  background:var(--surface); border-radius:18px; padding:10px 12px;
+  display:flex; align-items:center; gap:11px; box-shadow:0 3px 12px -6px rgba(74,63,51,.3);}
+.hc-ava{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-size:22px; flex:0 0 auto;}
+.hc-child .nm{font-family:'Zen Maru Gothic';font-weight:700;font-size:15px;line-height:1.1;}
+.hc-child .sub{font-size:11px;color:var(--ink2);font-weight:600;}
+.hc-pop{margin-top:8px; background:var(--surface); border-radius:18px; padding:6px;
+  box-shadow:0 12px 30px -10px rgba(74,63,51,.4); animation:pop .16s ease;}
+@keyframes pop{from{opacity:0; transform:translateY(-6px)}to{opacity:1;transform:none}}
+.hc-pop button{width:100%; border:none; background:none; cursor:pointer; padding:9px 8px;
+  display:flex; align-items:center; gap:11px; border-radius:13px; text-align:left;}
+.hc-pop button:hover{background:var(--cream);}
+.hc-pop .nm{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px;}
+
+/* generic */
+.hc-body{padding:4px 18px 26px;}
+.hc-h{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px; margin:18px 2px 9px;
+  display:flex; align-items:center; gap:6px;}
+.hc-h .more{margin-left:auto; font-size:11.5px; color:var(--apricot-d); font-weight:700;
+  display:flex; align-items:center; gap:1px; cursor:pointer; background:none; border:none;}
+.card{background:var(--surface); border-radius:20px; padding:15px;
+  box-shadow:0 3px 14px -8px rgba(74,63,51,.3);}
+
+/* hero */
+.hero{border-radius:24px; padding:17px 17px 15px; color:#fff; position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#F4A85C 0%, #EF8F4A 55%, #E07E2E 100%);
+  box-shadow:0 14px 30px -14px rgba(224,126,46,.7);}
+.hero:after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;
+  background:rgba(255,255,255,.13);}
+.hero:before{content:'';position:absolute;right:30px;bottom:-50px;width:110px;height:110px;border-radius:50%;
+  background:rgba(255,255,255,.1);}
+.hero .tag{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+  background:rgba(255,255,255,.22); padding:4px 10px; border-radius:999px; backdrop-filter:blur(2px);}
+.hero h2{font-family:'Zen Maru Gothic'; font-weight:900; font-size:21px; margin:9px 0 3px; position:relative;}
+.hero p{font-size:12.5px; font-weight:500; opacity:.95; line-height:1.55; position:relative;}
+
+/* quick actions */
+.qa{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:13px;}
+.qa button{border:none; cursor:pointer; background:var(--surface); border-radius:18px; padding:13px 12px;
+  display:flex; align-items:center; gap:10px; text-align:left;
+  box-shadow:0 3px 12px -7px rgba(74,63,51,.3); transition:transform .12s;}
+.qa button:active{transform:scale(.97);}
+.qa .ic{width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center; flex:0 0 auto;}
+.qa .lbl{font-family:'Zen Maru Gothic'; font-weight:700; font-size:12.5px; line-height:1.2;}
+.qa .sm{font-size:10px; color:var(--ink2); font-weight:600;}
+
+/* timeline */
+.tl{position:relative; padding-left:6px;}
+.tl-item{display:flex; gap:12px; align-items:flex-start; padding:3px 0;}
+.tl-rail{display:flex; flex-direction:column; align-items:center; width:18px; flex:0 0 auto;}
+.tl-dot{width:13px;height:13px;border-radius:50%; border:3px solid var(--surface); z-index:2;}
+.tl-line{width:2px; flex:1; background:var(--line); min-height:14px;}
+.tl-time{font-size:11px; font-weight:700; color:var(--ink2); width:42px; flex:0 0 auto; padding-top:0px;}
+.tl-txt{font-size:13px; font-weight:600; padding-bottom:11px;}
+.tl-txt b{font-family:'Zen Maru Gothic'; font-weight:700;}
+.tl-txt .d{font-size:11px; color:var(--ink2); font-weight:600;}
+
+/* status chips */
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:7px 11px; border-radius:14px;
+  font-size:12px; font-weight:700; font-family:'Zen Maru Gothic';}
+.chip .e{font-size:14px;}
+
+/* menu lunch */
+.lunch{display:flex; align-items:center; gap:13px;}
+.lunch .pic{width:54px;height:54px;border-radius:16px;background:var(--sage-soft);
+  display:flex;align-items:center;justify-content:center;font-size:26px; flex:0 0 auto;}
+
+/* news list */
+.news{display:flex; gap:12px; padding:13px 4px; border-bottom:1px solid var(--line); cursor:pointer; align-items:flex-start;}
+.news:last-child{border-bottom:none;}
+.news .cat{font-size:10px; font-weight:800; padding:3px 8px; border-radius:8px; flex:0 0 auto; margin-top:2px;}
+.news .t{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13.5px; line-height:1.35;}
+.news .meta{font-size:11px; color:var(--ink2); font-weight:600; margin-top:3px;}
+.news .unread{width:8px;height:8px;border-radius:50%;background:var(--berry); flex:0 0 auto; margin-top:7px;}
+
+/* log */
+.log-date{display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0 4px;}
+.log-date b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:17px;}
+.log-date button{border:none;background:var(--surface);width:30px;height:30px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--ink2); box-shadow:0 2px 6px -3px rgba(74,63,51,.3);}
+.sect-tab{display:flex; gap:8px; padding:5px; background:var(--cream2); border-radius:16px; margin:6px 0 14px;}
+.sect-tab button{flex:1; border:none; cursor:pointer; padding:9px; border-radius:12px; font-weight:700;
+  font-family:'Zen Maru Gothic'; font-size:13px; background:none; color:var(--ink2); display:flex;
+  align-items:center; justify-content:center; gap:6px;}
+.sect-tab button.on{background:var(--surface); color:var(--ink); box-shadow:0 2px 8px -4px rgba(74,63,51,.4);}
+
+.field{margin-bottom:15px;}
+.field > label{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+.seg{display:flex; gap:7px; flex-wrap:wrap;}
+.seg button{border:1.5px solid var(--line); background:var(--surface); cursor:pointer;
+  padding:8px 14px; border-radius:13px; font-weight:700; font-size:12.5px; color:var(--ink2);
+  font-family:'M PLUS Rounded 1c';}
+.seg button.on{border-color:var(--apricot); background:var(--apricot-soft); color:var(--apricot-d);}
+.temp{display:flex; align-items:center; gap:8px;}
+.temp .val{font-family:'Zen Maru Gothic'; font-weight:900; font-size:26px; color:var(--apricot-d);}
+.temp button{width:36px;height:36px;border-radius:12px;border:none;cursor:pointer;background:var(--apricot-soft);
+  color:var(--apricot-d); font-size:20px; font-weight:800; display:flex;align-items:center;justify-content:center;}
+.note{width:100%; border:1.5px solid var(--line); border-radius:14px; padding:11px 12px; font-size:13px;
+  font-family:'M PLUS Rounded 1c'; resize:none; color:var(--ink); background:var(--surface); box-sizing:border-box;}
+.note:focus{outline:none; border-color:var(--apricot);}
+.submit{width:100%; border:none; cursor:pointer; padding:14px; border-radius:16px; color:#fff;
+  font-family:'Zen Maru Gothic'; font-weight:700; font-size:15px; margin-top:4px;
+  background:linear-gradient(135deg,var(--apricot),var(--apricot-d)); display:flex; align-items:center;
+  justify-content:center; gap:7px; box-shadow:0 10px 22px -10px var(--apricot-d);}
+.submit:active{transform:scale(.99);}
+
+.en-row{display:flex; gap:12px; padding:13px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
+.en-row:last-child{border-bottom:none;}
+.en-ic{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.en-lbl{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13px;}
+.en-val{font-size:12.5px; color:var(--ink2); font-weight:600; margin-top:2px; line-height:1.5;}
+.teacher{background:var(--berry-soft); border-radius:16px; padding:13px; margin-top:4px;}
+.teacher .who{display:flex; align-items:center; gap:8px; font-family:'Zen Maru Gothic'; font-weight:700; font-size:12.5px;}
+.teacher .who .av{width:28px;height:28px;border-radius:9px;background:var(--berry);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.teacher p{font-size:13px; line-height:1.7; font-weight:500; margin-top:9px;}
+
+.past{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--line); cursor:pointer;}
+.past:last-child{border-bottom:none;}
+.past .dt{width:46px; flex:0 0 auto; text-align:center;}
+.past .dt b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:17px; display:block; line-height:1;}
+.past .dt span{font-size:10px; color:var(--ink2); font-weight:700;}
+.past .pv{font-size:12px; color:var(--ink2); font-weight:600; line-height:1.5;}
+
+/* check in */
+.bigtap{width:100%; border:none; cursor:pointer; border-radius:26px; padding:26px; color:#fff;
+  font-family:'Zen Maru Gothic'; display:flex; flex-direction:column; align-items:center; gap:10px;
+  box-shadow:0 18px 36px -16px rgba(0,0,0,.4); transition:transform .12s;}
+.bigtap:active{transform:scale(.98);}
+.bigtap .icw{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;}
+.bigtap b{font-size:22px; font-weight:900;}
+.bigtap span{font-size:12.5px; font-weight:600; opacity:.9;}
+.rec-row{display:flex; align-items:center; gap:13px; padding:13px 4px; border-bottom:1px solid var(--line);}
+.rec-row:last-child{border-bottom:none;}
+.rec-row .tg{font-size:11px; font-weight:800; padding:4px 9px; border-radius:9px; flex:0 0 auto;}
+.rec-row .tm{font-family:'Zen Maru Gothic'; font-weight:900; font-size:16px; margin-left:auto;}
+.qr-card{display:flex; flex-direction:column; align-items:center; gap:10px; padding:20px;}
+.qr-box{width:120px;height:120px;border-radius:18px;background:var(--cream);
+  display:flex;align-items:center;justify-content:center;color:var(--ink2); border:2px dashed var(--line);}
+
+/* calendar */
+.cal-head{display:flex; align-items:center; justify-content:space-between; margin:6px 0 12px;}
+.cal-head b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:17px;}
+.cal-head button{border:none;background:var(--surface);width:32px;height:32px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:0 2px 6px -3px rgba(74,63,51,.3);}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+.cal-dow{text-align:center; font-size:11px; font-weight:800; color:var(--ink2); padding:4px 0;}
+.cal-cell{aspect-ratio:1; border:none; cursor:pointer; background:none; border-radius:13px; position:relative;
+  font-weight:700; font-size:13px; color:var(--ink); display:flex; align-items:center; justify-content:center;}
+.cal-cell.muted{color:#cbbfad;}
+.cal-cell.today{background:var(--apricot); color:#fff;}
+.cal-cell.sel{box-shadow:inset 0 0 0 2px var(--apricot);}
+.cal-cell .ev{position:absolute; bottom:6px; display:flex; gap:2px;}
+.cal-cell .ev i{width:5px;height:5px;border-radius:50%;}
+.ev-item{display:flex; gap:11px; align-items:flex-start; padding:11px 0; border-bottom:1px solid var(--line);}
+.ev-item:last-child{border-bottom:none;}
+.ev-item .bar{width:4px; border-radius:4px; align-self:stretch; flex:0 0 auto;}
+.ev-item .t{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13.5px;}
+.ev-item .m{font-size:11.5px; color:var(--ink2); font-weight:600; margin-top:2px;}
+
+/* menu */
+.mrow{display:flex; align-items:center; gap:13px; padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer;}
+.mrow:last-child{border-bottom:none;}
+.mrow .ic{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.mrow .lbl{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px;}
+.mrow .sub{font-size:11px; color:var(--ink2); font-weight:600;}
+.mrow .badge{background:var(--berry); color:#fff; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px; margin-left:auto;}
+
+/* bottom nav */
+.hc-nav{flex:0 0 auto; display:flex; background:var(--surface); padding:8px 6px 22px;
+  box-shadow:0 -4px 20px -10px rgba(74,63,51,.3); position:relative; z-index:50;}
+.hc-nav button{flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column;
+  align-items:center; gap:3px; color:var(--ink2); font-size:10px; font-weight:700; padding:4px 0;
+  font-family:'M PLUS Rounded 1c';}
+.hc-nav button.on{color:var(--apricot-d);}
+.hc-nav .ni{position:relative;}
+.hc-nav .nb{position:absolute; top:-2px; right:-7px; width:8px;height:8px;border-radius:50%;background:var(--berry);
+  border:1.5px solid var(--surface);}
+
+/* sheet / overlay */
+.scrim{position:absolute; inset:0; background:rgba(40,30,16,.45); z-index:80; display:flex;
+  align-items:flex-end; animation:fade .2s ease;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{width:100%; background:var(--cream); border-radius:28px 28px 0 0; padding:8px 18px 26px;
+  max-height:82%; overflow-y:auto; animation:up .26s cubic-bezier(.2,.8,.2,1);}
+.sheet::-webkit-scrollbar{width:0;}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.grab{width:42px;height:5px;border-radius:5px;background:var(--line);margin:6px auto 14px;}
+.sheet-h{font-family:'Zen Maru Gothic'; font-weight:900; font-size:18px; display:flex; align-items:center; gap:8px;}
+.sheet-x{position:absolute; right:20px; border:none; background:var(--surface); width:32px;height:32px;
+  border-radius:50%; cursor:pointer; display:flex;align-items:center;justify-content:center; color:var(--ink2);}
+
+/* full overlay screen */
+.over{position:absolute; inset:0; z-index:80; background:var(--cream); display:flex; flex-direction:column;
+  animation:slide .26s cubic-bezier(.2,.8,.2,1);}
+@keyframes slide{from{transform:translateX(100%)}to{transform:none}}
+.over-head{flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:16px 18px 10px;}
+.over-head button{border:none;background:var(--surface);width:36px;height:36px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--ink); box-shadow:0 2px 8px -4px rgba(74,63,51,.3);}
+.over-head b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:17px;}
+.over-body{flex:1; overflow-y:auto; padding:4px 18px 26px;}
+.over-body::-webkit-scrollbar{width:0;}
+
+.toast{position:absolute; left:50%; bottom:96px; transform:translateX(-50%); z-index:90;
+  background:var(--ink); color:#fff; padding:11px 18px; border-radius:14px; font-size:13px; font-weight:700;
+  font-family:'Zen Maru Gothic'; display:flex; align-items:center; gap:8px; animation:pop .2s ease;
+  box-shadow:0 12px 30px -8px rgba(0,0,0,.5); white-space:nowrap;}
+`;
+
+const CHILDREN = [
+  { name: "はると", sub: "2さい・ひよこ組", emoji: "🐥", bg: "#FCE6CB" },
+  { name: "みお", sub: "4さい・ぞう組", emoji: "🐘", bg: "#DEEADE" },
+];
+
+const NEWS = [
+  { id: 1, cat: "重要", catC: "#C26B86", catBg: "#F4DCE4", t: "6/21（土）夏まつりのおしらせ", meta: "そらいろほいくえん ・ 6月16日", body: "今年も夏まつりを開催します。16:00〜18:00、園庭にて。ヨーヨーつり・おばけやしき・かきごおりの出店を予定しています。雨天の場合はホールで実施します。動きやすい服装でお越しください。", unread: true },
+  { id: 2, cat: "ひよこ組", catC: "#E07E2E", catBg: "#FCE6CB", t: "プール開きは6/24からです", meta: "ひよこ組 ・ 6月15日", body: "6月24日（火）よりプール遊びがはじまります。水着・タオル・水遊び用おむつに記名をお願いします。当日の朝は必ず検温し、連絡帳にご記入ください。37.5度以上の場合は見学となります。", unread: true },
+  { id: 3, cat: "給食", catC: "#7FA784", catBg: "#DEEADE", t: "今月の献立表を配信しました", meta: "給食室 ・ 6月13日", body: "6月の献立表をメニューの「おたより・しょるい」に掲載しました。アレルギーの確認が必要なメニューには印をつけています。ご不明な点は担任までお声がけください。", unread: false },
+];
+
+const EVENTS = {
+  21: [{ t: "夏まつり", m: "16:00〜18:00 ・ 園庭", c: "#C26B86" }],
+  24: [{ t: "プール開き", m: "水着・タオルを持参", c: "#6BA3C2" }],
+  18: [{ t: "身体measurement", m: "", c: "#7FA784" }],
+  27: [{ t: "6月生まれのお誕生日会", m: "10:30〜 ・ ホール", c: "#EF9A4D" }],
+};
+// fix event label
+EVENTS[18] = [{ t: "身体測定", m: "全クラス", c: "#7FA784" }];
+
+function HoikuConnectApp() {
+  const [tab, setTab] = useState("home");
+  const [child, setChild] = useState(0);
+  const [childOpen, setChildOpen] = useState(false);
+  const [read, setRead] = useState({ 3: true });
+  const [logTab, setLogTab] = useState("home"); // home = おうちから / en = えんから
+  const [temp, setTemp] = useState(36.5);
+  const [breakfast, setBreakfast] = useState("完食");
+  const [mood, setMood] = useState("ごきげん");
+  const [note, setNote] = useState("");
+  const [logSent, setLogSent] = useState(false);
+  const [checkedIn, setCheckedIn] = useState("8:32");
+  const [checkedOut, setCheckedOut] = useState(null);
+  const [newsDetail, setNewsDetail] = useState(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calSel, setCalSel] = useState(17);
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  const [surveyAns, setSurveyAns] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const c = CHILDREN[child];
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 1900);
+  };
+
+  const openNews = (n) => {
+    setRead((r) => ({ ...r, [n.id]: true }));
+    setNewsDetail(n);
+  };
+
+  const unreadCount = NEWS.filter((n) => !read[n.id]).length;
+
+  /* ---------------- HOME ---------------- */
+  const Home_ = () => (
+    <div className="hc-body">
+      <div className="hero">
+        <span className="tag"><Heart size={12} /> きょうのようす</span>
+        <h2>{checkedOut ? "おかえりなさい" : checkedIn ? "登園しています" : "おはようございます"}</h2>
+        <p>
+          {c.name}は{checkedIn ? `${checkedIn}に元気に登園しました。` : "まだ登園していません。"}
+          {!checkedOut && checkedIn ? "おむかえ予定は 17:00 です。" : ""}
+        </p>
+      </div>
+
+      <div className="qa">
+        <button onClick={() => { setTab("checkin"); }}>
+          <span className="ic" style={{ background: "var(--sky-soft)", color: "var(--sky)" }}><Footprints size={20} /></span>
+          <span><span className="lbl">登園・降園</span><span className="sm">うけつけ</span></span>
+        </button>
+        <button onClick={() => { setTab("log"); setLogTab("home"); }}>
+          <span className="ic" style={{ background: "var(--apricot-soft)", color: "var(--apricot-d)" }}><BookOpen size={20} /></span>
+          <span><span className="lbl">れんらくちょう</span><span className="sm">きょうの記入</span></span>
+        </button>
+        <button onClick={() => showToast("欠席・遅刻の連絡をひらきます")}>
+          <span className="ic" style={{ background: "var(--berry-soft)", color: "var(--berry)" }}><Phone size={20} /></span>
+          <span><span className="lbl">欠席・遅刻</span><span className="sm">れんらく</span></span>
+        </button>
+        <button onClick={() => setCalendarOpen(true)}>
+          <span className="ic" style={{ background: "var(--sage-soft)", color: "var(--sage)" }}><Calendar size={20} /></span>
+          <span><span className="lbl">カレンダー</span><span className="sm">行事よてい</span></span>
+        </button>
+      </div>
+
+      <div className="hc-h"><Footprints size={15} color="var(--sky)" /> きょうの一日</div>
+      <div className="card">
+        <div className="tl">
+          {[
+            { t: "8:32", x: "登園", d: "元気にとうえんしました", c: "var(--sky)" },
+            { t: "9:40", x: "あさのあそび", d: "おままごとを楽しみました", c: "var(--sage)" },
+            { t: "11:30", x: "給食", d: "ぜんぶ食べました", c: "var(--apricot)" },
+            { t: "12:40", x: "おひるね", d: "14:30まで ぐっすり", c: "var(--berry)" },
+            { t: "15:00", x: "おやつ", d: "ビスケットと牛乳", c: "var(--apricot)" },
+          ].map((it, i, arr) => (
+            <div className="tl-item" key={i}>
+              <span className="tl-time">{it.t}</span>
+              <span className="tl-rail">
+                <span className="tl-dot" style={{ background: it.c }} />
+                {i < arr.length - 1 && <span className="tl-line" />}
+              </span>
+              <span className="tl-txt"><b>{it.x}</b><br /><span className="d">{it.d}</span></span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hc-h"><Bell size={15} color="var(--berry)" /> おしらせ
+        <button className="more" onClick={() => setTab("news")}>すべて見る <ChevronRight size={13} /></button>
+      </div>
+      <div className="card" style={{ padding: "4px 15px" }}>
+        {NEWS.slice(0, 2).map((n) => (
+          <div className="news" key={n.id} onClick={() => openNews(n)}>
+            <span className="cat" style={{ color: n.catC, background: n.catBg }}>{n.cat}</span>
+            <div style={{ flex: 1 }}>
+              <div className="t">{n.t}</div>
+              <div className="meta">{n.meta}</div>
+            </div>
+            {!read[n.id] && <span className="unread" />}
+          </div>
+        ))}
+      </div>
+
+      <div className="hc-h"><Utensils size={15} color="var(--sage)" /> きょうの給食</div>
+      <div className="card lunch">
+        <span className="pic">🍙</span>
+        <div>
+          <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 14 }}>鮭おにぎり・じゃがいものみそ汁</div>
+          <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600, marginTop: 3 }}>
+            ほうれん草のおひたし ・ バナナ<br />おやつ：ビスケット・牛乳
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ---------------- LOG (連絡帳) ---------------- */
+  const LogHome = () => (
+    <>
+      {logSent && (
+        <div className="card" style={{ background: "var(--sage-soft)", display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <Check size={18} color="var(--sage)" />
+          <span style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 13 }}>きょうの連絡帳を送信しました</span>
+        </div>
+      )}
+      <div className="field">
+        <label><Thermometer size={15} color="var(--apricot-d)" /> 朝の体温</label>
+        <div className="temp">
+          <button onClick={() => setTemp((t) => Math.max(35, +(t - 0.1).toFixed(1)))}>−</button>
+          <span className="val">{temp.toFixed(1)}<span style={{ fontSize: 15 }}>℃</span></span>
+          <button onClick={() => setTemp((t) => Math.min(40, +(t + 0.1).toFixed(1)))}>+</button>
+        </div>
+      </div>
+
+      <div className="field">
+        <label><Utensils size={15} color="var(--sage)" /> 朝ごはん</label>
+        <div className="seg">
+          {["完食", "少し残した", "食べていない"].map((o) => (
+            <button key={o} className={breakfast === o ? "on" : ""} onClick={() => setBreakfast(o)}>{o}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="field">
+        <label><Smile size={15} color="var(--berry)" /> きょうの機嫌</label>
+        <div className="seg">
+          {["ごきげん", "ふつう", "ねむそう", "すこし不調"].map((o) => (
+            <button key={o} className={mood === o ? "on" : ""} onClick={() => setMood(o)}>{o}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="field">
+        <label><Moon size={15} color="var(--sky)" /> きのうの就寝 / きょうの起床</label>
+        <div className="seg">
+          <button className="on" style={{ borderColor: "var(--line)", background: "var(--surface)", color: "var(--ink)" }}>21:00 就寝</button>
+          <button className="on" style={{ borderColor: "var(--line)", background: "var(--surface)", color: "var(--ink)" }}>6:50 起床</button>
+        </div>
+      </div>
+
+      <div className="field">
+        <label><BookOpen size={15} color="var(--apricot-d)" /> おうちでのようす</label>
+        <textarea
+          className="note" rows={3}
+          placeholder="昨夜は少し咳がありましたが、朝は元気です…"
+          value={note} onChange={(e) => setNote(e.target.value)}
+        />
+      </div>
+
+      <button className="submit" onClick={() => { setLogSent(true); showToast("連絡帳を送信しました"); }}>
+        <Send size={17} /> 連絡帳をおくる
+      </button>
+
+      <div className="hc-h"><Calendar size={15} color="var(--ink2)" /> これまでの連絡帳</div>
+      <div className="card" style={{ padding: "4px 15px" }}>
+        {[
+          { d: "16", w: "月", pv: "37.0℃ ・ 完食 ・ おひるね 13:00-14:40" },
+          { d: "13", w: "金", pv: "36.6℃ ・ 完食 ・ お外でたくさん遊びました" },
+          { d: "12", w: "木", pv: "36.8℃ ・ 少し残した ・ ぐっすり眠れました" },
+        ].map((p, i) => (
+          <div className="past" key={i} onClick={() => showToast(`6月${p.d}日の連絡帳をひらきます`)}>
+            <div className="dt"><b>{p.d}</b><span>{p.w}</span></div>
+            <div className="pv">{p.pv}</div>
+            <ChevronRight size={16} color="var(--ink2)" />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+
+  const LogEn = () => (
+    <>
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div className="en-row">
+          <span className="en-ic" style={{ background: "var(--apricot-soft)", color: "var(--apricot-d)" }}><Thermometer size={18} /></span>
+          <div style={{ flex: 1 }}><div className="en-lbl">けんおん（園）</div><div className="en-val">10:00 — 36.6℃ ／ 15:00 — 36.7℃</div></div>
+        </div>
+        <div className="en-row">
+          <span className="en-ic" style={{ background: "var(--sage-soft)", color: "var(--sage)" }}><Utensils size={18} /></span>
+          <div style={{ flex: 1 }}><div className="en-lbl">給食</div><div className="en-val">完食しました。おかわりもしました 🍚</div></div>
+        </div>
+        <div className="en-row">
+          <span className="en-ic" style={{ background: "var(--apricot-soft)", color: "var(--apricot-d)" }}><Cookie size={18} /></span>
+          <div style={{ flex: 1 }}><div className="en-lbl">おやつ</div><div className="en-val">ビスケット・牛乳</div></div>
+        </div>
+        <div className="en-row">
+          <span className="en-ic" style={{ background: "var(--berry-soft)", color: "var(--berry)" }}><Moon size={18} /></span>
+          <div style={{ flex: 1 }}><div className="en-lbl">おひるね</div><div className="en-val">12:40 〜 14:30（ぐっすり）</div></div>
+        </div>
+        <div className="en-row">
+          <span className="en-ic" style={{ background: "var(--sky-soft)", color: "var(--sky)" }}>💩</span>
+          <div style={{ flex: 1 }}><div className="en-lbl">はいべん</div><div className="en-val">1回（ふつう）／ おむつ交換 4回</div></div>
+        </div>
+      </div>
+
+      <div className="teacher">
+        <div className="who"><span className="av">先</span> たんにん・さとう先生より</div>
+        <p>
+          今日はお外でしゃぼん玉あそびをしました。{c.name}くんは大きなしゃぼん玉を見つけて
+          「わー！」と大よろこび。給食もしっかり食べて、お昼寝もぐっすりでした。
+          少し鼻水が出ていたので、おうちでも様子を見てあげてください 🌷
+        </p>
+      </div>
+
+      <div className="card" style={{ marginTop: 14, padding: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>
+          <Camera size={15} color="var(--apricot-d)" /> きょうの写真
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+          {["🫧", "🌳", "🎨"].map((e, i) => (
+            <div key={i} style={{ aspectRatio: "1", borderRadius: 12, background: "var(--cream2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>{e}</div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  const Log_ = () => (
+    <div className="hc-body">
+      <div className="log-date">
+        <button><ChevronLeft size={16} /></button>
+        <b>6月17日（火）</b>
+        <button><ChevronRight size={16} /></button>
+      </div>
+      <div className="sect-tab">
+        <button className={logTab === "home" ? "on" : ""} onClick={() => setLogTab("home")}>🏠 おうちから</button>
+        <button className={logTab === "en" ? "on" : ""} onClick={() => setLogTab("en")}>🐥 えんから</button>
+      </div>
+      {logTab === "home" ? <LogHome /> : <LogEn />}
+    </div>
+  );
+
+  /* ---------------- CHECK IN ---------------- */
+  const CheckIn_ = () => {
+    const isOut = !!checkedIn && !checkedOut;
+    return (
+      <div className="hc-body">
+        <button
+          className="bigtap"
+          style={{ background: isOut ? "linear-gradient(135deg,#C26B86,#A8536E)" : "linear-gradient(135deg,#6BA3C2,#4D87A8)" }}
+          onClick={() => {
+            if (!checkedIn) { setCheckedIn("8:32"); showToast("登園を記録しました"); }
+            else if (!checkedOut) { setCheckedOut("17:05"); showToast("降園を記録しました"); }
+            else { setCheckedIn(null); setCheckedOut(null); showToast("記録をリセットしました"); }
+          }}
+        >
+          <span className="icw"><Footprints size={30} /></span>
+          <b>{!checkedIn ? "登園する" : !checkedOut ? "降園する" : "本日は登降園ずみ"}</b>
+          <span>{!checkedIn ? "ボタンをタップ または QRをよみとり" : !checkedOut ? "おむかえ時にタップ" : "おつかれさまでした"}</span>
+        </button>
+
+        <div className="card qr-card" style={{ marginTop: 14 }}>
+          <div className="qr-box"><QrCode size={56} /></div>
+          <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600, textAlign: "center" }}>
+            園の入口にあるQRコードを<br />よみとっても記録できます
+          </div>
+        </div>
+
+        <div className="hc-h"><Footprints size={15} color="var(--sky)" /> きょうの記録</div>
+        <div className="card" style={{ padding: "4px 15px" }}>
+          <div className="rec-row">
+            <span className="tg" style={{ color: "var(--sky)", background: "var(--sky-soft)" }}>登園</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink2)" }}>{checkedIn ? "記録ずみ" : "まだ"}</span>
+            <span className="tm">{checkedIn || "—:—"}</span>
+          </div>
+          <div className="rec-row">
+            <span className="tg" style={{ color: "var(--berry)", background: "var(--berry-soft)" }}>降園</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink2)" }}>{checkedOut ? "記録ずみ" : "まだ"}</span>
+            <span className="tm">{checkedOut || "—:—"}</span>
+          </div>
+        </div>
+
+        <div className="hc-h"><Bus size={15} color="var(--apricot-d)" /> 今日のおむかえ予定</div>
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+            <span className="hc-ava" style={{ background: "var(--apricot-soft)" }}>👩</span>
+            <div>
+              <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 14 }}>母（17:00ごろ）</div>
+              <div style={{ fontSize: 11.5, color: "var(--ink2)", fontWeight: 600 }}>変更がある場合は園にご連絡ください</div>
+            </div>
+            <button onClick={() => showToast("おむかえ予定を変更します")} style={{ marginLeft: "auto", border: "none", background: "var(--cream2)", borderRadius: 12, padding: "8px 12px", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'Zen Maru Gothic'", color: "var(--ink)" }}>変更</button>
+          </div>
+        </div>
+
+        <div className="hc-h"><Calendar size={15} color="var(--ink2)" /> これまでの登降園</div>
+        <div className="card" style={{ padding: "4px 15px" }}>
+          {[
+            { d: "16（月）", in: "8:28", out: "17:10" },
+            { d: "13（金）", in: "8:40", out: "16:50" },
+            { d: "12（木）", in: "8:35", out: "17:20" },
+          ].map((r, i, arr) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", padding: "12px 4px", borderBottom: i < arr.length - 1 ? "1px solid var(--line)" : "none" }}>
+              <span style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 13, width: 70 }}>{r.d}</span>
+              <span style={{ fontSize: 13, color: "var(--ink2)", fontWeight: 600 }}>登園 {r.in}</span>
+              <span style={{ fontSize: 13, color: "var(--ink2)", fontWeight: 600, marginLeft: "auto" }}>降園 {r.out}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------------- NEWS ---------------- */
+  const News_ = () => (
+    <div className="hc-body">
+      <div className="hc-h" style={{ marginTop: 8 }}><Bell size={15} color="var(--berry)" /> おしらせ
+        {unreadCount > 0 && <span style={{ marginLeft: 6, fontSize: 11, background: "var(--berry)", color: "#fff", padding: "2px 8px", borderRadius: 999, fontFamily: "'M PLUS Rounded 1c'" }}>未読 {unreadCount}</span>}
+      </div>
+      <div className="card" style={{ padding: "4px 15px" }}>
+        {NEWS.map((n) => (
+          <div className="news" key={n.id} onClick={() => openNews(n)}>
+            <span className="cat" style={{ color: n.catC, background: n.catBg }}>{n.cat}</span>
+            <div style={{ flex: 1 }}>
+              <div className="t">{n.t}</div>
+              <div className="meta">{n.meta}</div>
+            </div>
+            {!read[n.id] && <span className="unread" />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* ---------------- MENU ---------------- */
+  const Menu_ = () => (
+    <div className="hc-body">
+      <div className="hc-h" style={{ marginTop: 8 }}><LayoutGrid size={15} color="var(--ink2)" /> メニュー</div>
+      <div className="card" style={{ padding: "4px 15px" }}>
+        {[
+          { ic: <ClipboardList size={20} />, c: "var(--berry)", bg: "var(--berry-soft)", lbl: "アンケート", sub: "未回答 1件", badge: "1", on: () => setSurveyOpen(true) },
+          { ic: <Camera size={20} />, c: "var(--apricot-d)", bg: "var(--apricot-soft)", lbl: "写真・どうが", sub: "今月 24枚", on: () => showToast("写真アルバムをひらきます") },
+          { ic: <Calendar size={20} />, c: "var(--sage)", bg: "var(--sage-soft)", lbl: "行事カレンダー", sub: "6月の予定", on: () => setCalendarOpen(true) },
+          { ic: <BookOpen size={20} />, c: "var(--sky)", bg: "var(--sky-soft)", lbl: "おたより・しょるい", sub: "献立表・園だより", on: () => showToast("おたより一覧をひらきます") },
+          { ic: <Phone size={20} />, c: "var(--berry)", bg: "var(--berry-soft)", lbl: "園のれんらくさき", sub: "そらいろほいくえん", on: () => showToast("れんらくさきを表示します") },
+          { ic: <Settings size={20} />, c: "var(--ink2)", bg: "var(--cream2)", lbl: "設定", sub: "つうち・アカウント", on: () => showToast("設定をひらきます") },
+        ].map((m, i) => (
+          <div className="mrow" key={i} onClick={m.on}>
+            <span className="ic" style={{ background: m.bg, color: m.c }}>{m.ic}</span>
+            <div><div className="lbl">{m.lbl}</div><div className="sub">{m.sub}</div></div>
+            {m.badge && <span className="badge">{m.badge}</span>}
+            {!m.badge && <ChevronRight size={17} color="var(--ink2)" style={{ marginLeft: "auto" }} />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* ---------------- CALENDAR OVERLAY ---------------- */
+  const CalendarOverlay = () => {
+    const firstDow = 0; // 6月1日(日) approx start for grid
+    const cells = [];
+    for (let i = 0; i < firstDow; i++) cells.push(null);
+    for (let d = 1; d <= 30; d++) cells.push(d);
+    const dows = ["日", "月", "火", "水", "木", "金", "土"];
+    const selEvents = EVENTS[calSel] || [];
+    return (
+      <div className="over">
+        <div className="over-head">
+          <button onClick={() => setCalendarOpen(false)}><ChevronLeft size={18} /></button>
+          <b>行事カレンダー</b>
+        </div>
+        <div className="over-body">
+          <div className="card">
+            <div className="cal-head">
+              <button><ChevronLeft size={16} /></button>
+              <b>2026年 6月</b>
+              <button><ChevronRight size={16} /></button>
+            </div>
+            <div className="cal-grid">
+              {dows.map((d, i) => <div className="cal-dow" key={d} style={{ color: i === 0 ? "var(--berry)" : i === 6 ? "var(--sky)" : "var(--ink2)" }}>{d}</div>)}
+              {cells.map((d, i) => {
+                if (d === null) return <div key={i} />;
+                const ev = EVENTS[d];
+                const isToday = d === 17;
+                return (
+                  <button key={i} className={`cal-cell${isToday ? " today" : ""}${calSel === d ? " sel" : ""}`} onClick={() => setCalSel(d)}>
+                    {d}
+                    {ev && <span className="ev">{ev.map((e, j) => <i key={j} style={{ background: isToday ? "#fff" : e.c }} />)}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="hc-h">6月{calSel}日の予定</div>
+          <div className="card">
+            {selEvents.length === 0
+              ? <div style={{ fontSize: 13, color: "var(--ink2)", fontWeight: 600, padding: "6px 2px" }}>予定はありません</div>
+              : selEvents.map((e, i) => (
+                <div className="ev-item" key={i}>
+                  <span className="bar" style={{ background: e.c }} />
+                  <div><div className="t">{e.t}</div>{e.m && <div className="m">{e.m}</div>}</div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------------- NEWS DETAIL OVERLAY ---------------- */
+  const NewsDetailOverlay = () => (
+    <div className="over">
+      <div className="over-head">
+        <button onClick={() => setNewsDetail(null)}><ChevronLeft size={18} /></button>
+        <b>おしらせ</b>
+      </div>
+      <div className="over-body">
+        <span className="cat" style={{ display: "inline-block", color: newsDetail.catC, background: newsDetail.catBg, fontSize: 11, fontWeight: 800, padding: "4px 11px", borderRadius: 9 }}>{newsDetail.cat}</span>
+        <h2 style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 900, fontSize: 19, margin: "12px 0 6px", lineHeight: 1.4 }}>{newsDetail.t}</h2>
+        <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600 }}>{newsDetail.meta}</div>
+        <p style={{ fontSize: 14, lineHeight: 1.9, marginTop: 16, fontWeight: 500 }}>{newsDetail.body}</p>
+        <button className="submit" style={{ marginTop: 22 }} onClick={() => { showToast("「確認しました」を送信しました"); setNewsDetail(null); }}>
+          <Check size={17} /> 確認しました
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ---------------- SURVEY SHEET ---------------- */
+  const SurveySheet = () => (
+    <div className="scrim" onClick={() => setSurveyOpen(false)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="grab" />
+        <button className="sheet-x" onClick={() => setSurveyOpen(false)}><X size={16} /></button>
+        <div className="sheet-h"><ClipboardList size={20} color="var(--berry)" /> アンケート</div>
+        <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600, margin: "6px 0 18px" }}>回答期限：6月20日（金）</div>
+        <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 15, lineHeight: 1.6, marginBottom: 14 }}>
+          6/21（土）の夏まつりに参加されますか？
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {["参加します", "参加しません", "未定です"].map((o) => (
+            <button key={o} onClick={() => setSurveyAns(o)}
+              style={{
+                border: surveyAns === o ? "2px solid var(--apricot)" : "1.5px solid var(--line)",
+                background: surveyAns === o ? "var(--apricot-soft)" : "var(--surface)",
+                color: surveyAns === o ? "var(--apricot-d)" : "var(--ink)",
+                borderRadius: 16, padding: "15px 16px", cursor: "pointer", textAlign: "left",
+                fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 14,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+              {o}
+              {surveyAns === o && <Check size={18} />}
+            </button>
+          ))}
+        </div>
+        <button className="submit" style={{ marginTop: 20, opacity: surveyAns ? 1 : .5 }}
+          disabled={!surveyAns}
+          onClick={() => { setSurveyOpen(false); showToast("アンケートに回答しました"); }}>
+          <Send size={17} /> 回答をおくる
+        </button>
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    { id: "home", ic: Home, lbl: "ホーム" },
+    { id: "log", ic: BookOpen, lbl: "れんらく帳" },
+    { id: "checkin", ic: Footprints, lbl: "登降園" },
+    { id: "news", ic: Bell, lbl: "おしらせ", dot: unreadCount > 0 },
+    { id: "menu", ic: LayoutGrid, lbl: "メニュー" },
+  ];
+
+  return (
+    <div className="hc-root">
+      <style>{STYLES}</style>
+      <div className="hc-stage">
+        <div className="hc-phone">
+          <div className="hc-notch" />
+          <div className="hc-statusbar">
+            <span>9:41</span>
+            <span className="dots">
+              <span style={{ fontSize: 11 }}>●●●</span>
+              <span>📶</span>
+              <span className="bar" />
+            </span>
+          </div>
+
+          <div className="hc-scroll">
+            <div className="hc-head">
+              <div className="hc-head-row">
+                <div className="hc-brand">
+                  <span className="mk"><Heart size={18} fill="#fff" /></span>
+                  <div><b>そらいろ保育園</b><span>れんらくアプリ</span></div>
+                </div>
+                <button className="hc-bell" onClick={() => setTab("news")}>
+                  <Bell size={18} />
+                  {unreadCount > 0 && <span className="ndot" />}
+                </button>
+              </div>
+
+              <button className="hc-child" onClick={() => setChildOpen((o) => !o)}>
+                <span className="hc-ava" style={{ background: c.bg }}>{c.emoji}</span>
+                <div style={{ flex: 1 }}>
+                  <div className="nm">{c.name}</div>
+                  <div className="sub">{c.sub}</div>
+                </div>
+                <ChevronDown size={18} color="var(--ink2)" style={{ transform: childOpen ? "rotate(180deg)" : "none", transition: ".2s" }} />
+              </button>
+              {childOpen && (
+                <div className="hc-pop">
+                  {CHILDREN.map((ch, i) => (
+                    <button key={i} onClick={() => { setChild(i); setChildOpen(false); }}>
+                      <span className="hc-ava" style={{ background: ch.bg, width: 36, height: 36, fontSize: 19 }}>{ch.emoji}</span>
+                      <div style={{ flex: 1 }}>
+                        <div className="nm">{ch.name}</div>
+                        <div className="sub">{ch.sub}</div>
+                      </div>
+                      {child === i && <Check size={17} color="var(--apricot)" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {tab === "home" && <Home_ />}
+            {tab === "log" && <Log_ />}
+            {tab === "checkin" && <CheckIn_ />}
+            {tab === "news" && <News_ />}
+            {tab === "menu" && <Menu_ />}
+          </div>
+
+          <div className="hc-nav">
+            {tabs.map((t) => {
+              const I = t.ic;
+              return (
+                <button key={t.id} className={tab === t.id ? "on" : ""} onClick={() => setTab(t.id)}>
+                  <span className="ni">
+                    <I size={21} strokeWidth={tab === t.id ? 2.6 : 2} />
+                    {t.dot && <span className="nb" />}
+                  </span>
+                  {t.lbl}
+                </button>
+              );
+            })}
+          </div>
+
+          {calendarOpen && <CalendarOverlay />}
+          {newsDetail && <NewsDetailOverlay />}
+          {surveyOpen && <SurveySheet />}
+          {toast && <div className="toast"><Check size={16} /> {toast}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  そらいろ保育園 — 先生用 管理画面（タブレット/PC/スマホ対応）       */
+/* ------------------------------------------------------------------ */
+
+const STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
+
+.ad-root{
+  --cream:#FBF6EE; --cream2:#F4ECDC; --surface:#FFFFFF;
+  --apricot:#EF9A4D; --apricot-d:#E07E2E; --apricot-soft:#FCE6CB;
+  --sage:#7FA784; --sage-d:#5E8A64; --sage-soft:#DEEADE; --berry:#C26B86; --berry-soft:#F4DCE4;
+  --sky:#6BA3C2; --sky-d:#4D87A8; --sky-soft:#DCEAF1;
+  --alert:#D9655C; --alert-soft:#FBE0DC;
+  --ink:#4A3F33; --ink2:#8C8073; --line:#EBE1D1; --line2:#F2EADD;
+  font-family:'M PLUS Rounded 1c',sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased;
+}
+.ad-stage{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:22px 12px;
+  background:radial-gradient(1100px 600px at 85% -10%,#FBE6CC 0,transparent 55%),
+             radial-gradient(900px 600px at -10% 110%,#DEEADE 0,transparent 50%), #EDE3D2;}
+.browser{width:100%; max-width:1120px; height:760px; background:var(--cream); border-radius:16px;
+  overflow:hidden; box-shadow:0 30px 80px -28px rgba(40,30,16,.55), 0 0 0 1px rgba(74,63,51,.06);
+  display:flex; flex-direction:column;}
+.bz-bar{flex:0 0 auto; display:flex; align-items:center; gap:14px; padding:11px 16px; background:#E7DCC8;
+  border-bottom:1px solid var(--line);}
+.bz-dots{display:flex; gap:7px;}
+.bz-dots i{width:12px;height:12px;border-radius:50%;}
+.bz-url{flex:1; background:var(--surface); border-radius:9px; padding:6px 13px; font-size:12px; color:var(--ink2);
+  font-weight:600; display:flex; align-items:center; gap:7px; max-width:360px;}
+
+.shell{flex:1; display:flex; min-height:0; position:relative;}
+
+/* sidebar */
+.side{width:228px; flex:0 0 auto; background:var(--surface); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; padding:16px 12px; z-index:30;}
+.side-brand{display:flex; align-items:center; gap:10px; padding:4px 8px 16px;}
+.side-brand .mk{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--apricot),var(--berry));
+  display:flex;align-items:center;justify-content:center;color:#fff; flex:0 0 auto;}
+.side-brand b{font-family:'Zen Maru Gothic'; font-weight:900; font-size:15px; line-height:1.1; display:block;}
+.side-brand span{font-size:10.5px; color:var(--ink2); font-weight:600;}
+.side-nav{display:flex; flex-direction:column; gap:3px; margin-top:6px;}
+.side-nav button{display:flex; align-items:center; gap:11px; border:none; background:none; cursor:pointer;
+  padding:11px 12px; border-radius:13px; font-family:'Zen Maru Gothic'; font-weight:700; font-size:13.5px;
+  color:var(--ink2); text-align:left; width:100%; position:relative;}
+.side-nav button:hover{background:var(--cream);}
+.side-nav button.on{background:var(--apricot-soft); color:var(--apricot-d);}
+.side-nav .nb{margin-left:auto; background:var(--berry); color:#fff; font-size:10px; font-weight:800;
+  min-width:19px; height:19px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 5px;}
+.side-foot{margin-top:auto; display:flex; align-items:center; gap:10px; padding:10px 8px; border-top:1px solid var(--line2);}
+.side-foot .av{width:34px;height:34px;border-radius:11px;background:var(--sage-soft);color:var(--sage-d);
+  display:flex;align-items:center;justify-content:center;font-family:'Zen Maru Gothic';font-weight:900;font-size:14px;}
+.side-foot .nm{font-family:'Zen Maru Gothic';font-weight:700;font-size:13px;}
+.side-foot .rl{font-size:10.5px;color:var(--ink2);font-weight:600;}
+
+/* main */
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:15px 22px; border-bottom:1px solid var(--line);
+  background:var(--cream);}
+.burger{display:none; border:none;background:var(--surface);width:38px;height:38px;border-radius:11px;cursor:pointer;
+  align-items:center;justify-content:center;color:var(--ink); box-shadow:0 2px 8px -4px rgba(74,63,51,.3);}
+.topbar h1{font-family:'Zen Maru Gothic'; font-weight:900; font-size:18px;}
+.topbar .date{margin-left:auto; font-size:12.5px; color:var(--ink2); font-weight:700; display:flex; align-items:center; gap:6px;}
+.content{flex:1; overflow-y:auto; padding:20px 22px 28px;}
+.content::-webkit-scrollbar{width:8px;} .content::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px;}
+
+/* shared bits */
+.h2{font-family:'Zen Maru Gothic'; font-weight:700; font-size:15px; margin:22px 2px 11px; display:flex; align-items:center; gap:7px;}
+.h2:first-child{margin-top:4px;}
+.card{background:var(--surface); border-radius:18px; padding:16px; box-shadow:0 3px 14px -9px rgba(74,63,51,.3);}
+.grid{display:grid; gap:14px;}
+.stat{display:grid; grid-template-columns:repeat(4,1fr); gap:13px;}
+.stat .c{background:var(--surface); border-radius:18px; padding:15px 16px; box-shadow:0 3px 14px -9px rgba(74,63,51,.3);
+  display:flex; align-items:center; gap:13px;}
+.stat .ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.stat .n{font-family:'Zen Maru Gothic'; font-weight:900; font-size:26px; line-height:1;}
+.stat .l{font-size:11.5px; color:var(--ink2); font-weight:700; margin-top:3px;}
+
+.two{display:grid; grid-template-columns:1.4fr 1fr; gap:16px; align-items:start;}
+
+.row{display:flex; gap:12px; align-items:flex-start; padding:12px 2px; border-bottom:1px solid var(--line2);}
+.row:last-child{border-bottom:none;}
+.tag{font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:8px; flex:0 0 auto;}
+.muted{font-size:12px; color:var(--ink2); font-weight:600;}
+
+.classtab{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+.classtab button{border:1.5px solid var(--line); background:var(--surface); cursor:pointer; padding:8px 16px;
+  border-radius:13px; font-family:'Zen Maru Gothic'; font-weight:700; font-size:13px; color:var(--ink2);}
+.classtab button.on{border-color:var(--apricot); background:var(--apricot-soft); color:var(--apricot-d);}
+
+/* attendance board */
+.board{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
+.kid{background:var(--surface); border-radius:16px; padding:14px; cursor:pointer; text-align:center;
+  box-shadow:0 3px 12px -8px rgba(74,63,51,.3); border:2px solid transparent; transition:transform .1s;}
+.kid:active{transform:scale(.97);}
+.kid .face{width:50px;height:50px;border-radius:16px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.kid .nm{font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px;}
+.kid .st{font-size:11px; font-weight:800; margin-top:6px; padding:4px 0; border-radius:9px;}
+
+/* nap */
+.naptop{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;}
+.timer{background:var(--berry); color:#fff; border-radius:18px; padding:14px 22px; display:flex; align-items:center; gap:14px;
+  box-shadow:0 10px 24px -12px var(--berry);}
+.timer.warn{background:var(--alert); box-shadow:0 10px 24px -10px var(--alert); animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.78}}
+.timer .t{font-family:'Zen Maru Gothic'; font-weight:900; font-size:30px; line-height:1; font-variant-numeric:tabular-nums;}
+.timer .l{font-size:11px; font-weight:700; opacity:.9;}
+.napbtn{border:none; cursor:pointer; background:var(--sage); color:#fff; border-radius:14px; padding:13px 20px;
+  font-family:'Zen Maru Gothic'; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;
+  box-shadow:0 8px 18px -10px var(--sage-d);}
+.napgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(218px,1fr)); gap:12px;}
+.napcard{background:var(--surface); border-radius:16px; padding:13px; box-shadow:0 3px 12px -8px rgba(74,63,51,.3);
+  border:2px solid transparent;}
+.napcard.alert{border-color:var(--alert); background:var(--alert-soft);}
+.napcard .top{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.napcard .face{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto;}
+.napcard .nm{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13.5px;}
+.napcard .last{font-size:10.5px; color:var(--ink2); font-weight:600;}
+.poss{display:flex; gap:5px;}
+.poss button{flex:1; border:1.5px solid var(--line); background:var(--surface); cursor:pointer; border-radius:10px;
+  padding:7px 2px; font-size:11px; font-weight:800; color:var(--ink2); font-family:'M PLUS Rounded 1c';}
+.poss button.up.on{border-color:var(--sage); background:var(--sage-soft); color:var(--sage-d);}
+.poss button.side.on{border-color:var(--apricot); background:var(--apricot-soft); color:var(--apricot-d);}
+.poss button.down.on{border-color:var(--alert); background:var(--alert-soft); color:var(--alert);}
+.breath{margin-top:9px; display:flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color:var(--sage-d);}
+
+/* log entry */
+.banner{background:var(--apricot-soft); color:var(--apricot-d); border-radius:14px; padding:11px 14px;
+  font-size:12px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:16px;}
+.logwrap{display:grid; grid-template-columns:240px 1fr; gap:16px; align-items:start;}
+.kidlist{background:var(--surface); border-radius:16px; padding:8px; box-shadow:0 3px 12px -9px rgba(74,63,51,.3);}
+.kidlist button{width:100%; border:none; background:none; cursor:pointer; display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:12px; text-align:left;}
+.kidlist button.on{background:var(--apricot-soft);}
+.kidlist button:hover{background:var(--cream);}
+.kidlist .face{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 auto;}
+.kidlist .nm{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13px;}
+.kidlist .done{margin-left:auto; color:var(--sage);}
+.field{margin-bottom:16px;}
+.field>label{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+.seg{display:flex; gap:7px; flex-wrap:wrap;}
+.seg button{border:1.5px solid var(--line); background:var(--surface); cursor:pointer; padding:8px 14px; border-radius:12px;
+  font-weight:700; font-size:12.5px; color:var(--ink2); font-family:'M PLUS Rounded 1c';}
+.seg button.on{border-color:var(--apricot); background:var(--apricot-soft); color:var(--apricot-d);}
+.temp{display:flex; align-items:center; gap:8px;}
+.temp .v{font-family:'Zen Maru Gothic'; font-weight:900; font-size:24px; color:var(--apricot-d);}
+.temp button{width:34px;height:34px;border-radius:11px;border:none;cursor:pointer;background:var(--apricot-soft);
+  color:var(--apricot-d); display:flex;align-items:center;justify-content:center;}
+.note{width:100%; border:1.5px solid var(--line); border-radius:13px; padding:11px 12px; font-size:13px;
+  font-family:'M PLUS Rounded 1c'; resize:none; color:var(--ink); box-sizing:border-box; background:var(--surface);}
+.note:focus,.inp:focus{outline:none; border-color:var(--apricot);}
+.btn{border:none; cursor:pointer; border-radius:14px; padding:13px 18px; color:#fff; font-family:'Zen Maru Gothic';
+  font-weight:700; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:linear-gradient(135deg,var(--apricot),var(--apricot-d)); box-shadow:0 9px 20px -11px var(--apricot-d);}
+.btn:active{transform:scale(.99);}
+.btn.sage{background:linear-gradient(135deg,var(--sage),var(--sage-d)); box-shadow:0 9px 20px -11px var(--sage-d);}
+
+/* news compose + readrate */
+.inp{width:100%; border:1.5px solid var(--line); border-radius:13px; padding:11px 12px; font-size:13px;
+  font-family:'M PLUS Rounded 1c'; color:var(--ink); box-sizing:border-box; background:var(--surface);}
+.readbar{height:9px; border-radius:9px; background:var(--cream2); overflow:hidden; margin-top:8px;}
+.readbar i{display:block; height:100%; border-radius:9px; background:linear-gradient(90deg,var(--sage),var(--sage-d));}
+.sent{padding:13px 2px; border-bottom:1px solid var(--line2);}
+.sent:last-child{border-bottom:none;}
+.sent .t{font-family:'Zen Maru Gothic'; font-weight:700; font-size:13.5px;}
+.sent .rr{display:flex; align-items:center; justify-content:space-between; font-size:11.5px; font-weight:700; color:var(--ink2); margin-top:9px;}
+
+.toast{position:absolute; left:50%; bottom:26px; transform:translateX(-50%); z-index:90; background:var(--ink);
+  color:#fff; padding:11px 18px; border-radius:13px; font-size:13px; font-weight:700; font-family:'Zen Maru Gothic';
+  display:flex; align-items:center; gap:8px; box-shadow:0 12px 30px -8px rgba(0,0,0,.5);
+  animation:tin .2s ease; white-space:nowrap;}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.scrim-m{display:none;}
+
+@media (max-width:880px){
+  .side{position:absolute; top:0; bottom:0; left:0; transform:translateX(-105%); transition:transform .26s;
+    box-shadow:0 0 50px rgba(0,0,0,.25);}
+  .side.open{transform:none;}
+  .scrim-m.show{display:block; position:absolute; inset:0; background:rgba(40,30,16,.4); z-index:25;}
+  .burger{display:flex;}
+  .stat{grid-template-columns:repeat(2,1fr);}
+  .two{grid-template-columns:1fr;}
+  .logwrap{grid-template-columns:1fr;}
+}
+@media (max-width:560px){
+  .browser{height:740px; border-radius:12px;}
+  .content{padding:16px 14px 24px;}
+  .topbar{padding:13px 14px;}
+}
+`;
+
+const CLASSES = ["ひよこ組", "ぞう組"];
+
+const KIDS = {
+  "ひよこ組": [
+    { id: "h1", nm: "はると", e: "🐥", bg: "#FCE6CB", st: "in", in: "8:32" },
+    { id: "h2", nm: "さくら", e: "🌸", bg: "#F4DCE4", st: "in", in: "8:15" },
+    { id: "h3", nm: "ゆうと", e: "🚜", bg: "#DCEAF1", st: "in", in: "8:48" },
+    { id: "h4", nm: "ひなた", e: "🌻", bg: "#DEEADE", st: "in", in: "9:02" },
+    { id: "h5", nm: "そうた", e: "🐰", bg: "#FCE6CB", st: "absent" },
+    { id: "h6", nm: "めい", e: "🐱", bg: "#F4DCE4", st: "yet" },
+  ],
+  "ぞう組": [
+    { id: "z1", nm: "みお", e: "🐘", bg: "#DEEADE", st: "in", in: "8:20" },
+    { id: "z2", nm: "けんと", e: "⚽", bg: "#DCEAF1", st: "in", in: "8:35" },
+    { id: "z3", nm: "あおい", e: "💧", bg: "#DCEAF1", st: "late" },
+    { id: "z4", nm: "りく", e: "🦖", bg: "#FCE6CB", st: "in", in: "8:41" },
+    { id: "z5", nm: "ゆい", e: "🎀", bg: "#F4DCE4", st: "out", in: "8:10", out: "12:30" },
+    { id: "z6", nm: "たいが", e: "🐯", bg: "#FCE6CB", st: "in", in: "8:55" },
+  ],
+};
+
+const ST_META = {
+  in: { l: "在園中", c: "var(--sage-d)", bg: "var(--sage-soft)" },
+  out: { l: "降園ずみ", c: "var(--berry)", bg: "var(--berry-soft)" },
+  absent: { l: "欠席", c: "var(--ink2)", bg: "var(--cream2)" },
+  late: { l: "遅刻連絡", c: "var(--apricot-d)", bg: "var(--apricot-soft)" },
+  yet: { l: "未登園", c: "var(--sky-d)", bg: "var(--sky-soft)" },
+};
+
+const SENT_NEWS = [
+  { t: "夏まつりのおしらせ（6/21）", to: "全体", read: 28, total: 32 },
+  { t: "プール開きは6/24からです", to: "ひよこ組", read: 11, total: 14 },
+  { t: "今月の献立表を配信しました", to: "全体", read: 32, total: 32 },
+];
+
+function HoikuAdminApp() {
+  const [nav, setNav] = useState("dash");
+  const [sideOpen, setSideOpen] = useState(false);
+  const [boardClass, setBoardClass] = useState("ひよこ組");
+  const [attend, setAttend] = useState({});
+  const [logClass, setLogClass] = useState("ひよこ組");
+  const [logKid, setLogKid] = useState("h1");
+  const [logDone, setLogDone] = useState({ h2: true, h4: true });
+  const [temp, setTemp] = useState(36.6);
+  const [lunch, setLunch] = useState("完食");
+  const [poop, setPoop] = useState("1回・ふつう");
+  const [comment, setComment] = useState("");
+  const [napPos, setNapPos] = useState({ h1: "up", h2: "up", h3: "side", h4: "up" });
+  const [napTimer, setNapTimer] = useState(184);
+  const [round, setRound] = useState(3);
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsBody, setNewsBody] = useState("");
+  const [newsTo, setNewsTo] = useState("全体");
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setNapTimer((t) => (t <= 0 ? 0 : t - 1)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const showToast = (m) => { setToast(m); setTimeout(() => setToast(null), 1900); };
+  const go = (n) => { setNav(n); setSideOpen(false); };
+
+  const napKids = KIDS["ひよこ組"].filter((k) => ["in"].includes(attend[k.id] || k.st));
+  const proneCount = napKids.filter((k) => napPos[k.id] === "down").length;
+
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
+  const navItems = [
+    { id: "dash", ic: LayoutDashboard, l: "ダッシュボード" },
+    { id: "attendance", ic: Footprints, l: "登降園ボード" },
+    { id: "nap", ic: Moon, l: "午睡チェック", nb: proneCount > 0 ? proneCount : null },
+    { id: "log", ic: BookOpen, l: "連絡帳の記入" },
+    { id: "news", ic: Bell, l: "おしらせ配信" },
+  ];
+
+  /* ---------- DASHBOARD ---------- */
+  const renderDash = () => {
+    const all = [...KIDS["ひよこ組"], ...KIDS["ぞう組"]];
+    const get = (k) => attend[k.id] || k.st;
+    const inN = all.filter((k) => get(k) === "in").length;
+    const absN = all.filter((k) => get(k) === "absent").length;
+    const yetN = all.filter((k) => ["yet", "late"].includes(get(k))).length;
+    const outN = all.filter((k) => get(k) === "out").length;
+    return (
+      <>
+        <div className="stat">
+          {[
+            { ic: <Footprints size={22} />, c: "var(--sage-d)", bg: "var(--sage-soft)", n: inN, l: "在園中" },
+            { ic: <Check size={22} />, c: "var(--berry)", bg: "var(--berry-soft)", n: outN, l: "降園ずみ" },
+            { ic: <Clock size={22} />, c: "var(--sky-d)", bg: "var(--sky-soft)", n: yetN, l: "未登園・遅刻" },
+            { ic: <X size={22} />, c: "var(--ink2)", bg: "var(--cream2)", n: absN, l: "欠席" },
+          ].map((s, i) => (
+            <div className="c" key={i}>
+              <span className="ic" style={{ background: s.bg, color: s.c }}>{s.ic}</span>
+              <div><div className="n" style={{ color: s.c }}>{s.n}</div><div className="l">{s.l}</div></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="two" style={{ marginTop: 18 }}>
+          <div>
+            <div className="h2"><Bell size={16} color="var(--apricot-d)" /> 保護者からの新着連絡</div>
+            <div className="card">
+              {[
+                { tag: "欠席", c: "var(--ink2)", bg: "var(--cream2)", nm: "そうた（ひよこ組）", msg: "発熱のためお休みします。朝の体温 38.2℃。", t: "7:45" },
+                { tag: "遅刻", c: "var(--apricot-d)", bg: "var(--apricot-soft)", nm: "あおい（ぞう組）", msg: "通院のため10時ごろ登園します。", t: "7:58" },
+                { tag: "連絡帳", c: "var(--sage-d)", bg: "var(--sage-soft)", nm: "はると（ひよこ組）", msg: "昨夜少し咳。朝は元気です。", t: "8:05" },
+              ].map((r, i) => (
+                <div className="row" key={i}>
+                  <span className="tag" style={{ color: r.c, background: r.bg }}>{r.tag}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 13.5 }}>{r.nm}</div>
+                    <div className="muted" style={{ marginTop: 2 }}>{r.msg}</div>
+                  </div>
+                  <span className="muted">{r.t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="h2"><Moon size={16} color="var(--berry)" /> 午睡チェック</div>
+            <div className="card" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div className="timer" style={{ padding: "12px 18px" }}>
+                <div><div className="t">{fmt(napTimer)}</div><div className="l">次のチェックまで</div></div>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 700, fontSize: 13 }}>ひよこ組 ・ {napKids.length}名 おひるね中</div>
+                <button className="muted" onClick={() => go("nap")} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--apricot-d)", fontWeight: 700, marginTop: 6, display: "flex", alignItems: "center", gap: 2, padding: 0 }}>
+                  チェック画面へ <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            <div className="h2"><BookOpen size={16} color="var(--sage)" /> 連絡帳の記入状況</div>
+            <div className="card">
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700 }}>
+                <span>本日の記入</span><span style={{ color: "var(--sage-d)" }}>5 / 10 名</span>
+              </div>
+              <div className="readbar"><i style={{ width: "50%" }} /></div>
+              <button className="muted" onClick={() => go("log")} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--apricot-d)", fontWeight: 700, marginTop: 11, display: "flex", alignItems: "center", gap: 2, padding: 0 }}>
+                記入をつづける <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  /* ---------- ATTENDANCE BOARD ---------- */
+  const renderAttendance = () => (
+    <>
+      <div className="classtab">
+        {CLASSES.map((c) => (
+          <button key={c} className={boardClass === c ? "on" : ""} onClick={() => setBoardClass(c)}>{c}</button>
+        ))}
+      </div>
+      <div className="board">
+        {KIDS[boardClass].map((k) => {
+          const st = attend[k.id] || k.st;
+          const m = ST_META[st];
+          return (
+            <div className="kid" key={k.id} style={{ borderColor: st === "in" ? "var(--sage-soft)" : "transparent" }}
+              onClick={() => {
+                setAttend((a) => ({ ...a, [k.id]: st === "in" ? "out" : "in" }));
+                showToast(`${k.nm}を「${st === "in" ? "降園" : "登園"}」で記録しました`);
+              }}>
+              <div className="face" style={{ background: k.bg }}>{k.e}</div>
+              <div className="nm">{k.nm}</div>
+              <div className="st" style={{ color: m.c, background: m.bg }}>{m.l}</div>
+              {(k.in || k.out) && (
+                <div className="muted" style={{ marginTop: 6, fontSize: 10.5 }}>
+                  {k.in && `登 ${k.in}`}{k.out && ` / 降 ${k.out}`}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="muted" style={{ marginTop: 14 }}>カードをタップで登園 / 降園を切り替えられます。入口のQR打刻もこのボードに反映されます。</p>
+    </>
+  );
+
+  /* ---------- NAP CHECK ---------- */
+  const renderNap = () => (
+    <>
+      <div className="naptop">
+        <div className={`timer${napTimer <= 0 ? " warn" : ""}`}>
+          {napTimer <= 0 ? <AlertTriangle size={26} /> : <Clock size={26} />}
+          <div>
+            <div className="t">{fmt(napTimer)}</div>
+            <div className="l">{napTimer <= 0 ? "チェックの時間です！" : "次の一斉チェックまで"}</div>
+          </div>
+        </div>
+        <button className="napbtn" onClick={() => { setNapTimer(300); setRound((r) => r + 1); showToast(`${round + 1}回目の午睡チェックを記録しました`); }}>
+          <Check size={18} /> 全員チェック完了（{round}回目）
+        </button>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--ink2)" }}>ひよこ組 ・ {napKids.length}名 おひるね中</div>
+      </div>
+
+      {proneCount > 0 && (
+        <div className="banner" style={{ background: "var(--alert-soft)", color: "var(--alert)", marginBottom: 16 }}>
+          <AlertTriangle size={16} /> うつ伏せの園児が {proneCount} 名います。あお向けに直してください。
+        </div>
+      )}
+
+      <div className="napgrid">
+        {napKids.map((k) => {
+          const pos = napPos[k.id] || "up";
+          return (
+            <div className={`napcard${pos === "down" ? " alert" : ""}`} key={k.id}>
+              <div className="top">
+                <span className="face" style={{ background: k.bg }}>{k.e}</span>
+                <div><div className="nm">{k.nm}</div><div className="last">前回 {round}回目 ・ 良好</div></div>
+              </div>
+              <div className="poss">
+                {[["up", "あお向け"], ["side", "横向き"], ["down", "うつ伏せ"]].map(([v, l]) => (
+                  <button key={v} className={`${v} ${pos === v ? "on" : ""}`}
+                    onClick={() => setNapPos((p) => ({ ...p, [k.id]: v }))}>{l}</button>
+                ))}
+              </div>
+              <div className="breath" style={{ color: pos === "down" ? "var(--alert)" : "var(--sage-d)" }}>
+                {pos === "down" ? <><AlertTriangle size={14} /> 体勢に注意</> : <><Wind size={14} /> 呼吸を確認 ✓</>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="muted" style={{ marginTop: 14 }}>0〜1歳児は5分・2歳児は10分ごとのチェックが目安です。記録は自動で保存され、保護者には「えんから」に反映されます。</p>
+    </>
+  );
+
+  /* ---------- LOG ENTRY ---------- */
+  const renderLog = () => {
+    const list = KIDS[logClass];
+    const kid = list.find((k) => k.id === logKid) || list[0];
+    const doneCount = list.filter((k) => logDone[k.id]).length;
+    return (
+      <>
+        <div className="banner"><BookOpen size={15} /> 入力した内容は、保護者アプリの「えんから」にそのまま表示されます。</div>
+        <div className="classtab">
+          {CLASSES.map((c) => (
+            <button key={c} className={logClass === c ? "on" : ""}
+              onClick={() => { setLogClass(c); setLogKid(KIDS[c][0].id); }}>{c}</button>
+          ))}
+          <span style={{ marginLeft: "auto", alignSelf: "center", fontSize: 12.5, fontWeight: 700, color: "var(--sage-d)" }}>
+            記入 {doneCount} / {list.length} 名
+          </span>
+        </div>
+
+        <div className="logwrap">
+          <div className="kidlist">
+            {list.map((k) => (
+              <button key={k.id} className={logKid === k.id ? "on" : ""} onClick={() => setLogKid(k.id)}>
+                <span className="face" style={{ background: k.bg }}>{k.e}</span>
+                <span className="nm">{k.nm}</span>
+                {logDone[k.id] && <Check size={16} className="done" />}
+              </button>
+            ))}
+          </div>
+
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <span className="face" style={{ width: 40, height: 40, borderRadius: 13, background: kid.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21 }}>{kid.e}</span>
+              <div style={{ fontFamily: "'Zen Maru Gothic'", fontWeight: 900, fontSize: 17 }}>{kid.nm}の連絡帳</div>
+            </div>
+
+            <div className="field">
+              <label><Thermometer size={15} color="var(--apricot-d)" /> 検温（園）</label>
+              <div className="temp">
+                <button onClick={() => setTemp((t) => +(t - 0.1).toFixed(1))}><Minus size={16} /></button>
+                <span className="v">{temp.toFixed(1)}℃</span>
+                <button onClick={() => setTemp((t) => +(t + 0.1).toFixed(1))}><Plus size={16} /></button>
+              </div>
+            </div>
+
+            <div className="field">
+              <label><Utensils size={15} color="var(--sage)" /> 給食</label>
+              <div className="seg">
+                {["完食", "おかわり", "少し残した", "食べていない"].map((o) => (
+                  <button key={o} className={lunch === o ? "on" : ""} onClick={() => setLunch(o)}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <label>💩 はいべん</label>
+              <div className="seg">
+                {["なし", "1回・ふつう", "2回・ふつう", "ゆるめ"].map((o) => (
+                  <button key={o} className={poop === o ? "on" : ""} onClick={() => setPoop(o)}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <label><Moon size={15} color="var(--berry)" /> おひるね</label>
+              <div className="seg">
+                <button className="on" style={{ borderColor: "var(--line)", background: "var(--surface)", color: "var(--ink)" }}>12:40 〜 14:30</button>
+              </div>
+            </div>
+
+            <div className="field">
+              <label><BookOpen size={15} color="var(--apricot-d)" /> きょうのようす（先生コメント）</label>
+              <textarea className="note" rows={3} value={comment} onChange={(e) => setComment(e.target.value)}
+                placeholder="お外でしゃぼん玉あそびをしました。給食もしっかり…" />
+            </div>
+
+            <button className="btn sage" onClick={() => { setLogDone((d) => ({ ...d, [kid.id]: true })); showToast(`${kid.nm}の連絡帳を保存しました`); }}>
+              <Send size={16} /> 保存して保護者に公開
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  /* ---------- NEWS ---------- */
+  const renderNews = () => (
+    <div className="two">
+      <div>
+        <div className="h2"><Plus size={16} color="var(--apricot-d)" /> あたらしいおしらせ</div>
+        <div className="card">
+          <div className="field">
+            <label>宛先</label>
+            <div className="seg">
+              {["全体", "ひよこ組", "ぞう組"].map((o) => (
+                <button key={o} className={newsTo === o ? "on" : ""} onClick={() => setNewsTo(o)}>{o}</button>
+              ))}
+            </div>
+          </div>
+          <div className="field">
+            <label>タイトル</label>
+            <input className="inp" value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="例）夏まつりのおしらせ" />
+          </div>
+          <div className="field">
+            <label>本文</label>
+            <textarea className="note" rows={5} value={newsBody} onChange={(e) => setNewsBody(e.target.value)} placeholder="保護者へのおしらせを入力…" />
+          </div>
+          <button className="btn" onClick={() => { showToast(`「${newsTo}」へおしらせを配信しました`); setNewsTitle(""); setNewsBody(""); }}>
+            <Send size={16} /> 配信する
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div className="h2"><Eye size={16} color="var(--sage)" /> 配信ずみ・既読率</div>
+        <div className="card">
+          {SENT_NEWS.map((n, i) => {
+            const pct = Math.round((n.read / n.total) * 100);
+            return (
+              <div className="sent" key={i}>
+                <div className="t">{n.t}</div>
+                <div className="readbar"><i style={{ width: pct + "%" }} /></div>
+                <div className="rr">
+                  <span>宛先：{n.to}</span>
+                  <span style={{ color: pct === 100 ? "var(--sage-d)" : "var(--ink2)" }}>{n.read}/{n.total} 既読（{pct}%）</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const titleMap = { dash: "ダッシュボード", attendance: "登降園ボード", nap: "午睡チェック", log: "連絡帳の記入", news: "おしらせ配信" };
+
+  return (
+    <div className="ad-root">
+      <style>{STYLES}</style>
+      <div className="ad-stage">
+        <div className="browser">
+          <div className="bz-bar">
+            <div className="bz-dots"><i style={{ background: "#E0857D" }} /><i style={{ background: "#E8C06A" }} /><i style={{ background: "#86B98B" }} /></div>
+            <div className="bz-url"><CircleDot size={12} /> soraciro-hoiku.jp/admin</div>
+          </div>
+
+          <div className="shell">
+            <div className={`scrim-m${sideOpen ? " show" : ""}`} onClick={() => setSideOpen(false)} />
+            <aside className={`side${sideOpen ? " open" : ""}`}>
+              <div className="side-brand">
+                <span className="mk"><LayoutDashboard size={20} /></span>
+                <div><b>そらいろ保育園</b><span>かんり画面</span></div>
+              </div>
+              <nav className="side-nav">
+                {navItems.map((it) => {
+                  const I = it.ic;
+                  return (
+                    <button key={it.id} className={nav === it.id ? "on" : ""} onClick={() => go(it.id)}>
+                      <I size={18} /> {it.l}
+                      {it.nb && <span className="nb">{it.nb}</span>}
+                    </button>
+                  );
+                })}
+              </nav>
+              <div className="side-foot">
+                <span className="av">佐</span>
+                <div><div className="nm">さとう先生</div><div className="rl">ひよこ組 担任</div></div>
+              </div>
+            </aside>
+
+            <main className="main">
+              <div className="topbar">
+                <button className="burger" onClick={() => setSideOpen(true)}><Menu size={20} /></button>
+                <h1>{titleMap[nav]}</h1>
+                <div className="date"><Clock size={14} /> 2026年6月17日（火）9:41</div>
+              </div>
+              <div className="content">
+                {nav === "dash" && renderDash()}
+                {nav === "attendance" && renderAttendance()}
+                {nav === "nap" && renderNap()}
+                {nav === "log" && renderLog()}
+                {nav === "news" && renderNews()}
+              </div>
+            </main>
+          </div>
+
+          {toast && <div className="toast"><Check size={16} /> {toast}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function Demo() {
+  return (
+    <div className="demo-page">
+      <header className="demo-head">
+        <h1>そらいろ保育園 れんらくアプリ <em>デモ</em></h1>
+        <p>左：保護者アプリ（スマホ）／ 右：先生用 管理画面（PC・タブレット）。<br/>画面が狭いときは縦に並びます。すべてダミーデータで実際に操作できます。</p>
+      </header>
+      <div className="demo-row">
+        <div className="demo-col">
+          <div className="demo-label">📱 保護者アプリ</div>
+          <HoikuConnectApp />
+        </div>
+        <div className="demo-col">
+          <div className="demo-label">💻 先生用 管理画面</div>
+          <HoikuAdminApp />
+        </div>
+      </div>
+      <footer className="demo-foot">プロトタイプ ・ © そらいろ保育園 れんらくアプリ</footer>
+    </div>
+  );
+}
+createRoot(document.getElementById("root")).render(<Demo />);
+
+</script>
+</body>
+</html>
